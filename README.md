@@ -1,8 +1,8 @@
 # 3D Hand Tracker
 
-I built this project to explore a lightweight way to add depth estimation to single-webcam hand tracking. My goal was to estimate where my index fingertip was in a small 3D workspace and use it to draw.
+I started by drawing MediaPipe’s hand landmarks over my webcam feed. The overlay showed where my fingertip was in the image, and the landmark depth told me where it was relative to my wrist. When I moved my whole hand toward the webcam, I still needed a way to place the fingertip in the 3D space in front of me.
 
-MediaPipe gave me 21 hand landmarks with depth relative to my wrist. To train a model that could place my fingertip in the workspace, I collected about 100 examples. For each one, the app showed a target in an on-screen box. I aimed at where I imagined that point would be in front of the camera and saved the landmark coordinates as the input and the target coordinates as the training label.
+I wanted to keep the setup monocular, using one ordinary webcam, and see how much a lightweight model could infer from the landmarks. I built a collector that displayed targets inside a virtual box. For each target, I aimed my fingertip where I imagined the point would be in front of the camera, then saved the landmark coordinates as the input and the target coordinates as the training label. After collecting about 100 examples, I trained a small PyTorch model and used its live predictions to draw in OpenGL.
 
 <img src="docs/media/draw-and-rotate.gif" alt="Mirrored hand landmarks alongside a synchronized 3D view, where the estimated fingertip places amber vertices before the finished sketch rotates" width="960">
 
@@ -10,12 +10,7 @@ MediaPipe gave me 21 hand landmarks with depth relative to my wrist. To train a 
 
 ## Live pipeline
 
-```mermaid
-flowchart LR
-    Camera["Webcam<br/>OpenCV frames"] --> Landmarks["MediaPipe<br/>21 landmark triples"]
-    Landmarks --> Model["PyTorch<br/>63 → 32 → 3"]
-    Model --> View["OpenGL<br/>3D fingertip and sketch"]
-```
+<img src="docs/media/live-pipeline.png" alt="OpenCV captures a webcam frame. MediaPipe extracts 21 landmark triples. A 63 to 32 to 3 PyTorch model predicts the fingertip position, and OpenGL displays it in a 3D workspace." width="960">
 
 ## Collecting training data
 
@@ -68,4 +63,10 @@ python draw_live.py data/capture_...pt
 
 I kept the landmarks in image coordinates so the network can use where the hand appears and how much of the frame it occupies. A hand can also look smaller when it turns or curls, which makes distance from a single camera ambiguous.
 
-The box is centered at the origin, with X across the desk, Y away from me, and Z up. Its side lengths follow a 2:2:1 ratio in arbitrary units. The training labels include my aiming error. To measure how accurately the model places my fingertip, I’d need test positions with known physical coordinates.
+The box is centered at the origin, with X across the desk, Y away from me, and Z up. Its side lengths follow a 2:2:1 ratio in arbitrary units.
+
+## What I’d try next
+
+The first thing I’d improve is the training data. Pointing at an imagined target leaves my aiming error in the label. I’d try tracking colored markers with two synchronized, calibrated cameras and triangulating their positions. That setup would be used for data collection and evaluation, while the trained model would still take a single unmarked camera view at inference.
+
+I’d also like to compare single-camera and multi-camera tracking, then extend the idea from fingertip position to full-body pose. The longer-term experiment would be to see how much 3D body pose I could recover from an ordinary phone video.
