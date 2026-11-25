@@ -6,15 +6,15 @@ MediaPipe's open-source hand model gave me 21 landmarks and an estimate of each 
 
 **Webcam → MediaPipe landmarks → lightweight PyTorch model → 3D position visualized in OpenGL**
 
-<img src="docs/media/draw-and-rotate.gif" alt="Placing amber vertices and edges with the estimated fingertip, then rotating the wireframe box to view the sketch from different angles" width="960">
+<img src="docs/media/draw-and-rotate.gif" alt="Mirrored hand landmarks alongside a synchronized 3D view, where the estimated fingertip places amber vertices before the finished sketch rotates" width="960">
 
-*I place vertices with my fingertip, connect them into a sketch, then rotate the box to see the shape from different angles.*
+*On the left is my hand with the MediaPipe landmarks. On the right, the teal dot follows the model’s fingertip estimate. I place vertices and edges, then rotate the finished sketch to see its depth.*
 
 ## Collecting training data
 
-<img src="docs/media/collect-samples.gif" alt="A teal target moves among prompted positions inside the wireframe box as training samples are captured" width="960">
+<img src="docs/media/collect-samples.gif" alt="Mirrored hand landmarks alongside a synchronized 3D view of the teal target changing position after each training sample" width="960">
 
-*I aim my fingertip at the teal target and press Space. The collector saves the current landmarks with that target's coordinates, then shows the next target.*
+*Here the teal dot is the target I’m trying to hit. I press **Space** to pair the current landmarks with that target, then the collector shows a new one. Both panels in each GIF use the same frames from the screen recording.*
 
 ## Run it
 
@@ -52,6 +52,13 @@ python draw_live.py data/capture_...pt
 
 ## How it works
 
-OpenCV reads the webcam frames and MediaPipe returns 21 landmark triples. I flatten those into 63 inputs, pass them through a 32-unit ReLU layer, and predict three coordinates in the virtual box. The box is centered at the origin with a 2:2:1 ratio across X, Y, and Z. The dotted lines show where the estimated position projects onto its faces.
+| Stage | Tools | What I built |
+| --- | --- | --- |
+| Webcam input | OpenCV, MediaPipe Hand Landmarker | Mirror the webcam frame and detect 21 landmarks. Each landmark has normalized image `x` and `y`, plus a wrist-relative `z`. |
+| Data collection | Python, JSON Lines | Sample a target inside the box. A keypress pairs the displayed frame’s landmarks with the target’s `[x, y, z]`. Each capture session has its own file. |
+| Position model | PyTorch | Flatten the 21 triples into a 63-value vector. Train a `63 → 32 → 3` network with a ReLU hidden layer, mean squared error, and Adam at `0.001` for 400 epochs. The model has 2,147 trainable parameters. |
+| Live view and drawing | GLFW, PyOpenGL | Run inference on each frame with valid landmarks. Draw the prediction as a sphere and project it along the three axes with dotted guides. Store vertices and edges in box coordinates so the sketch stays in place when the view pans or rotates. |
 
-The labels are the targets I aimed for, so they include my own aiming error. The coordinates are in arbitrary box units. The demos show how the prototype responds to movement, while measuring accuracy would require known physical reference points.
+I kept the landmarks in image coordinates so the network can use where the hand appears and how much of the frame it occupies. A hand can also look smaller when it turns or curls, which makes distance from a single camera ambiguous.
+
+The box is centered at the origin, with X across the desk, Y away from me, and Z up. Its side lengths follow a 2:2:1 ratio in arbitrary units. The training labels include my aiming error. To measure how accurately the model places my fingertip, I’d need test positions with known physical coordinates.
