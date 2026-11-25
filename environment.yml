@@ -1,0 +1,12 @@
+name: hand-tracker
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - mediapipe
+      - opencv-contrib-python  # Provides cv2 and satisfies MediaPipe's dependency.
+      - torch
+      - PyOpenGL
+      - glfw  # Creates the OpenGL window and handles keyboard input.

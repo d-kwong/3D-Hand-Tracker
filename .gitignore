@@ -1,0 +1,8 @@
+/data/
+/hand_landmarker.task
+/.vscode/
+__pycache__/
+*.py[cod]
+.DS_Store
+*.mov
+*.pt
