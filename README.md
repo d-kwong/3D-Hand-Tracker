@@ -1,14 +1,21 @@
 # 3D Hand Tracker
 
-This started as a little experiment I made in a day. I wanted to see if I could use my webcam to draw in 3D with my index finger.
+I built this project to explore a lightweight way to add depth estimation to single-webcam hand tracking. My goal was to estimate where my index fingertip was in a small 3D workspace and use it to draw.
 
-MediaPipe's open-source hand model gave me 21 landmarks and an estimate of each landmark's depth relative to my wrist. I still needed to figure out where my fingertip was inside a box I imagined in front of the camera. So I pointed at imaginary locations about 100 times, saved the landmarks each time, and trained a small PyTorch model to predict the position I was aiming for.
-
-**Webcam → MediaPipe landmarks → lightweight PyTorch model → 3D position visualized in OpenGL**
+MediaPipe gave me 21 hand landmarks with depth relative to my wrist. To train a model that could place my fingertip in the workspace, I collected about 100 examples. For each one, the app showed a target in an on-screen box. I aimed at where I imagined that point would be in front of the camera and saved the landmark coordinates as the input and the target coordinates as the training label.
 
 <img src="docs/media/draw-and-rotate.gif" alt="Mirrored hand landmarks alongside a synchronized 3D view, where the estimated fingertip places amber vertices before the finished sketch rotates" width="960">
 
 *On the left is my hand with the MediaPipe landmarks. On the right, the teal dot follows the model’s fingertip estimate. I place vertices and edges, then rotate the finished sketch to see its depth.*
+
+## Live pipeline
+
+```mermaid
+flowchart LR
+    Camera["Webcam<br/>OpenCV frames"] --> Landmarks["MediaPipe<br/>21 landmark triples"]
+    Landmarks --> Model["PyTorch<br/>63 → 32 → 3"]
+    Model --> View["OpenGL<br/>3D fingertip and sketch"]
+```
 
 ## Collecting training data
 
