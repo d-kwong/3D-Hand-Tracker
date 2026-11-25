@@ -1,8 +1,10 @@
 # 3D Hand Tracker
 
+I wanted to build a quick proof of concept for drawing in 3D with my index finger. The idea was to use one ordinary webcam and see whether a lightweight model could infer my fingertip’s 3D position from hand landmarks.
+
 I started by drawing MediaPipe’s hand landmarks over my webcam feed. The overlay showed where my fingertip was in the image, and the landmark depth told me where it was relative to my wrist. When I moved my whole hand toward the webcam, I still needed a way to place the fingertip in the 3D space in front of me.
 
-I wanted to keep the setup monocular, using one ordinary webcam, and see how much a lightweight model could infer from the landmarks. I built a collector that displayed targets inside a virtual box. For each target, I aimed my fingertip where I imagined the point would be in front of the camera, then saved the landmark coordinates as the input and the target coordinates as the training label. After collecting about 100 examples, I trained a small PyTorch model and used its live predictions to draw in OpenGL.
+To train the model, I built a collector that displayed targets inside a virtual box. For each target, I aimed my fingertip where I imagined the point would be in front of the camera, then saved the landmark coordinates as the input and the target coordinates as the training label. After collecting about 100 examples, I trained a small PyTorch model and used its live predictions to draw in OpenGL.
 
 <img src="docs/media/draw-and-rotate.gif" alt="Mirrored hand landmarks alongside a synchronized 3D view, where the estimated fingertip places amber vertices before the finished sketch rotates" width="960">
 
