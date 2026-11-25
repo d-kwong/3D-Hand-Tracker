@@ -12,7 +12,10 @@ To train the model, I built a collector that displayed targets inside a virtual 
 
 ## Live pipeline
 
-<img src="docs/media/live-pipeline.png" alt="OpenCV captures a webcam frame. MediaPipe extracts 21 landmark triples. A 63 to 32 to 3 PyTorch model predicts the fingertip position, and OpenGL displays it in a 3D workspace." width="960">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/media/pipeline-outline-dark.png">
+  <img src="docs/media/pipeline-outline-light.png" alt="OpenCV captures a webcam frame. MediaPipe extracts 21 landmark triples. A 63 to 32 to 3 PyTorch model predicts the fingertip position, and OpenGL displays it in a 3D workspace." width="960">
+</picture>
 
 ## Collecting training data
 
